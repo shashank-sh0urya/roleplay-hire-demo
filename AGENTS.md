@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project architecture
+
+- Keep shared SmartHire workspace state in a root-level provider so every file-based page uses the same data and actions.
+- Give the named SmartHire work areas separate TanStack leaf routes so links, browser history, and page metadata remain dependable.
