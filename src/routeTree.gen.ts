@@ -10,33 +10,206 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ApplicationsRouteImport } from './routes/applications'
+import { Route as CompaniesRouteImport } from './routes/companies'
+import { Route as DiscoverRouteImport } from './routes/discover'
+import { Route as HiremateRouteImport } from './routes/hiremate'
+import { Route as InterviewsRouteImport } from './routes/interviews'
+import { Route as MockInterviewRouteImport } from './routes/mock-interview'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as PreparationRouteImport } from './routes/preparation'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as RecruiterRouteImport } from './routes/recruiter'
+import { Route as ResumeAssistantRouteImport } from './routes/resume-assistant'
+import { Route as ShortlistRouteImport } from './routes/shortlist'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApplicationsRoute = ApplicationsRouteImport.update({
+  id: '/applications',
+  path: '/applications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompaniesRoute = CompaniesRouteImport.update({
+  id: '/companies',
+  path: '/companies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HiremateRoute = HiremateRouteImport.update({
+  id: '/hiremate',
+  path: '/hiremate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InterviewsRoute = InterviewsRouteImport.update({
+  id: '/interviews',
+  path: '/interviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MockInterviewRoute = MockInterviewRouteImport.update({
+  id: '/mock-interview',
+  path: '/mock-interview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreparationRoute = PreparationRouteImport.update({
+  id: '/preparation',
+  path: '/preparation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecruiterRoute = RecruiterRouteImport.update({
+  id: '/recruiter',
+  path: '/recruiter',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResumeAssistantRoute = ResumeAssistantRouteImport.update({
+  id: '/resume-assistant',
+  path: '/resume-assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShortlistRoute = ShortlistRouteImport.update({
+  id: '/shortlist',
+  path: '/shortlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/applications': typeof ApplicationsRoute
+  '/companies': typeof CompaniesRoute
+  '/discover': typeof DiscoverRoute
+  '/hiremate': typeof HiremateRoute
+  '/interviews': typeof InterviewsRoute
+  '/mock-interview': typeof MockInterviewRoute
+  '/notifications': typeof NotificationsRoute
+  '/preparation': typeof PreparationRoute
+  '/profile': typeof ProfileRoute
+  '/recruiter': typeof RecruiterRoute
+  '/resume-assistant': typeof ResumeAssistantRoute
+  '/shortlist': typeof ShortlistRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/applications': typeof ApplicationsRoute
+  '/companies': typeof CompaniesRoute
+  '/discover': typeof DiscoverRoute
+  '/hiremate': typeof HiremateRoute
+  '/interviews': typeof InterviewsRoute
+  '/mock-interview': typeof MockInterviewRoute
+  '/notifications': typeof NotificationsRoute
+  '/preparation': typeof PreparationRoute
+  '/profile': typeof ProfileRoute
+  '/recruiter': typeof RecruiterRoute
+  '/resume-assistant': typeof ResumeAssistantRoute
+  '/shortlist': typeof ShortlistRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/applications': typeof ApplicationsRoute
+  '/companies': typeof CompaniesRoute
+  '/discover': typeof DiscoverRoute
+  '/hiremate': typeof HiremateRoute
+  '/interviews': typeof InterviewsRoute
+  '/mock-interview': typeof MockInterviewRoute
+  '/notifications': typeof NotificationsRoute
+  '/preparation': typeof PreparationRoute
+  '/profile': typeof ProfileRoute
+  '/recruiter': typeof RecruiterRoute
+  '/resume-assistant': typeof ResumeAssistantRoute
+  '/shortlist': typeof ShortlistRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/applications'
+    | '/companies'
+    | '/discover'
+    | '/hiremate'
+    | '/interviews'
+    | '/mock-interview'
+    | '/notifications'
+    | '/preparation'
+    | '/profile'
+    | '/recruiter'
+    | '/resume-assistant'
+    | '/shortlist'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/applications'
+    | '/companies'
+    | '/discover'
+    | '/hiremate'
+    | '/interviews'
+    | '/mock-interview'
+    | '/notifications'
+    | '/preparation'
+    | '/profile'
+    | '/recruiter'
+    | '/resume-assistant'
+    | '/shortlist'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/applications'
+    | '/companies'
+    | '/discover'
+    | '/hiremate'
+    | '/interviews'
+    | '/mock-interview'
+    | '/notifications'
+    | '/preparation'
+    | '/profile'
+    | '/recruiter'
+    | '/resume-assistant'
+    | '/shortlist'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  ApplicationsRoute: typeof ApplicationsRoute
+  CompaniesRoute: typeof CompaniesRoute
+  DiscoverRoute: typeof DiscoverRoute
+  HiremateRoute: typeof HiremateRoute
+  InterviewsRoute: typeof InterviewsRoute
+  MockInterviewRoute: typeof MockInterviewRoute
+  NotificationsRoute: typeof NotificationsRoute
+  PreparationRoute: typeof PreparationRoute
+  ProfileRoute: typeof ProfileRoute
+  RecruiterRoute: typeof RecruiterRoute
+  ResumeAssistantRoute: typeof ResumeAssistantRoute
+  ShortlistRoute: typeof ShortlistRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +221,115 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/applications': {
+      id: '/applications'
+      path: '/applications'
+      fullPath: '/applications'
+      preLoaderRoute: typeof ApplicationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/companies': {
+      id: '/companies'
+      path: '/companies'
+      fullPath: '/companies'
+      preLoaderRoute: typeof CompaniesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hiremate': {
+      id: '/hiremate'
+      path: '/hiremate'
+      fullPath: '/hiremate'
+      preLoaderRoute: typeof HiremateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/interviews': {
+      id: '/interviews'
+      path: '/interviews'
+      fullPath: '/interviews'
+      preLoaderRoute: typeof InterviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mock-interview': {
+      id: '/mock-interview'
+      path: '/mock-interview'
+      fullPath: '/mock-interview'
+      preLoaderRoute: typeof MockInterviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/preparation': {
+      id: '/preparation'
+      path: '/preparation'
+      fullPath: '/preparation'
+      preLoaderRoute: typeof PreparationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recruiter': {
+      id: '/recruiter'
+      path: '/recruiter'
+      fullPath: '/recruiter'
+      preLoaderRoute: typeof RecruiterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resume-assistant': {
+      id: '/resume-assistant'
+      path: '/resume-assistant'
+      fullPath: '/resume-assistant'
+      preLoaderRoute: typeof ResumeAssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shortlist': {
+      id: '/shortlist'
+      path: '/shortlist'
+      fullPath: '/shortlist'
+      preLoaderRoute: typeof ShortlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  ApplicationsRoute: ApplicationsRoute,
+  CompaniesRoute: CompaniesRoute,
+  DiscoverRoute: DiscoverRoute,
+  HiremateRoute: HiremateRoute,
+  InterviewsRoute: InterviewsRoute,
+  MockInterviewRoute: MockInterviewRoute,
+  NotificationsRoute: NotificationsRoute,
+  PreparationRoute: PreparationRoute,
+  ProfileRoute: ProfileRoute,
+  RecruiterRoute: RecruiterRoute,
+  ResumeAssistantRoute: ResumeAssistantRoute,
+  ShortlistRoute: ShortlistRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

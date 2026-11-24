@@ -112,28 +112,28 @@ function readDemoState(raw: string): WorkspaceState | null {
     if (!isRecord(parsed)) return null;
 
     const defaults = createDemoState();
-    const profile = isRecord(parsed.profile)
-      ? ({ ...defaults.profile, ...parsed.profile } as CandidateProfile)
+    const profile = isRecord(parsed["profile"])
+      ? ({ ...defaults.profile, ...parsed["profile"] } as CandidateProfile)
       : defaults.profile;
 
     return {
       ...defaults,
-      role: parsed.role === "recruiter" || parsed.role === "admin" ? parsed.role : "candidate",
+      role: parsed["role"] === "recruiter" || parsed["role"] === "admin" ? parsed["role"] : "candidate",
       profile,
-      jobs: Array.isArray(parsed.jobs) ? (parsed.jobs as Job[]) : defaults.jobs,
-      applications: Array.isArray(parsed.applications) ? (parsed.applications as Application[]) : defaults.applications,
-      interviews: Array.isArray(parsed.interviews) ? (parsed.interviews as Interview[]) : defaults.interviews,
-      notifications: Array.isArray(parsed.notifications) ? (parsed.notifications as AppNotification[]) : defaults.notifications,
-      shortlistIds: isStringArray(parsed.shortlistIds) ? parsed.shortlistIds : defaults.shortlistIds,
-      skippedIds: isStringArray(parsed.skippedIds) ? parsed.skippedIds : defaults.skippedIds,
-      completedRoadmapDays: Array.isArray(parsed.completedRoadmapDays)
-        ? parsed.completedRoadmapDays.filter((day): day is number => typeof day === "number")
+      jobs: Array.isArray(parsed["jobs"]) ? (parsed["jobs"] as Job[]) : defaults.jobs,
+      applications: Array.isArray(parsed["applications"]) ? (parsed["applications"] as Application[]) : defaults.applications,
+      interviews: Array.isArray(parsed["interviews"]) ? (parsed["interviews"] as Interview[]) : defaults.interviews,
+      notifications: Array.isArray(parsed["notifications"]) ? (parsed["notifications"] as AppNotification[]) : defaults.notifications,
+      shortlistIds: isStringArray(parsed["shortlistIds"]) ? parsed["shortlistIds"] : defaults.shortlistIds,
+      skippedIds: isStringArray(parsed["skippedIds"]) ? parsed["skippedIds"] : defaults.skippedIds,
+      completedRoadmapDays: Array.isArray(parsed["completedRoadmapDays"])
+        ? parsed["completedRoadmapDays"].filter((day): day is number => typeof day === "number")
         : defaults.completedRoadmapDays,
-      chatMessages: Array.isArray(parsed.chatMessages) ? (parsed.chatMessages as ChatMessage[]) : defaults.chatMessages,
-      resumeText: typeof parsed.resumeText === "string" ? parsed.resumeText : defaults.resumeText,
+      chatMessages: Array.isArray(parsed["chatMessages"]) ? (parsed["chatMessages"] as ChatMessage[]) : defaults.chatMessages,
+      resumeText: typeof parsed["resumeText"] === "string" ? parsed["resumeText"] : defaults.resumeText,
       resumeJobDescription:
-        typeof parsed.resumeJobDescription === "string" ? parsed.resumeJobDescription : defaults.resumeJobDescription,
-      mockAnswers: isStringArray(parsed.mockAnswers) ? parsed.mockAnswers : defaults.mockAnswers,
+        typeof parsed["resumeJobDescription"] === "string" ? parsed["resumeJobDescription"] : defaults.resumeJobDescription,
+      mockAnswers: isStringArray(parsed["mockAnswers"]) ? parsed["mockAnswers"] : defaults.mockAnswers,
     };
   } catch {
     return null;

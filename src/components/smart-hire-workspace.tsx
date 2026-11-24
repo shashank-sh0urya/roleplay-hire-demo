@@ -148,7 +148,7 @@ export function pageHead(title: string, description: string) {
 }
 
 export function SmartHireWorkspace({ view }: { view: WorkspaceView }) {
-  const { state } = useSmartHire();
+  const { state, setRole } = useSmartHire();
   const [accountPickerOpen, setAccountPickerOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [quickChatOpen, setQuickChatOpen] = useState(false);
@@ -234,7 +234,7 @@ export function SmartHireWorkspace({ view }: { view: WorkspaceView }) {
           </DialogHeader>
           <div className="demo-account-list">
             {(["candidate", "recruiter", "admin"] as DemoRole[]).map((role) => <Button key={role} variant="outline" className="demo-account-option" onClick={() => {
-              useRoleAction(role);
+              setRole(role);
               setAccountPickerOpen(false);
               toast.success(`${roleTitle(role)} demo opened`);
             }}>
@@ -266,10 +266,6 @@ export function SmartHireWorkspace({ view }: { view: WorkspaceView }) {
     </div>
   );
 
-  function useRoleAction(role: DemoRole) {
-    // The role change stays explicit and local to this clearly labeled demo.
-    window.dispatchEvent(new CustomEvent("smarthire-demo-role", { detail: role }));
-  }
 }
 
 function NavItem({ item, active, onNavigate }: { item: (typeof navItems)[number]; active: boolean; onNavigate?: () => void }) {
