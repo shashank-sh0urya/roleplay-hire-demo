@@ -73,6 +73,7 @@ import {
   formatSalary,
   getMatchResult,
   getProfileCompletion,
+  isApplicationChatOpen,
   type Application,
   type ApplicationStatus,
   type CandidateProfile,
@@ -411,6 +412,7 @@ function DiscoverPage() {
     if (!job) return;
     skipJob(job.id);
     setLastSwipe({ id: job.id, kind: "skip" });
+    toast.message("Role passed");
   }
 
   function saveCurrent() {
@@ -433,16 +435,16 @@ function DiscoverPage() {
     if (touchStart.current === null) return;
     const delta = event.clientX - touchStart.current;
     touchStart.current = null;
-    if (delta > 90) saveCurrent();
+    if (delta > 90) setApplyJob(job ?? null);
     if (delta < -90) skipCurrent();
   }
 
   return <div className="page-stack">
-    <PageIntro title="Find your next fit" description="Swipe to shortlist or skip. Saving never submits an application." action={lastSwipe ? <Button variant="outline" size="sm" onClick={undoSwipe}><Undo2 size={15} /> Undo</Button> : undefined} />
+    <PageIntro title="Find your next fit" description="Pass on roles with X, or apply and reach out when a role feels right. You can still save roles for later." action={lastSwipe ? <Button variant="outline" size="sm" onClick={undoSwipe}><Undo2 size={15} /> Undo</Button> : undefined} />
     <div className="discover-toolbar"><div className="search-field"><Search size={16} /><Input aria-label="Search jobs" placeholder="Role, company, or skill" value={search} onChange={(event) => setSearch(event.target.value)} /></div><Select value={location} onValueChange={setLocation}><SelectTrigger className="location-select" aria-label="Filter by location"><SelectValue placeholder="All locations" /></SelectTrigger><SelectContent><SelectItem value="all">All locations</SelectItem><SelectItem value="bengaluru">Bengaluru</SelectItem><SelectItem value="pune">Pune</SelectItem><SelectItem value="hyderabad">Hyderabad</SelectItem><SelectItem value="chennai">Chennai</SelectItem><SelectItem value="remote">Remote</SelectItem></SelectContent></Select><span className="result-count">{candidates.length} roles to explore</span></div>
 
     {job && company ? <div className="discovery-stage">
-      <div className="swipe-instruction"><span>← Skip</span><span>Shortlist →</span></div>
+      <div className="swipe-instruction"><span>← Pass</span><span>Apply &amp; reach out →</span></div>
       <Card className="discovery-card rounded-lg shadow-none" onPointerDown={(event) => { touchStart.current = event.clientX; }} onPointerUp={handlePointerEnd}>
         <CardContent className="discovery-card-content">
           <div className="discovery-company-line"><CompanyMark company={company} /><div><strong>{company.name}</strong><span>{company.industry} · sample profile</span></div><MatchBadge job={job} profile={state.profile} /></div>
@@ -454,10 +456,10 @@ function DiscoverPage() {
           <div className="discovery-footer"><span>Posted {job.postedAt} <i /> {job.openings} opening{job.openings === 1 ? "" : "s"}</span><Button variant="ghost" size="sm" onClick={() => setDetailsJob(job)}>Full details</Button></div>
         </CardContent>
       </Card>
-      <div className="swipe-actions"><Button variant="outline" size="icon" className="swipe-skip" onClick={skipCurrent} aria-label="Skip role" title="Skip role"><X size={21} /></Button><Button variant="outline" className="details-action" onClick={() => setDetailsJob(job)}><CircleHelp size={16} /> Details</Button><Button variant="outline" size="icon" className="swipe-save" onClick={saveCurrent} aria-label="Shortlist role" title="Shortlist role"><Heart size={20} /></Button><Button className="swipe-apply" onClick={() => setApplyJob(job)}>Apply now <ArrowRight size={16} /></Button></div>
-      <p className="swipe-hint">On touch screens, drag right to shortlist or left to skip.</p>
+      <div className="swipe-actions"><Button variant="outline" size="icon" className="swipe-skip" onClick={skipCurrent} aria-label="Pass on role" title="Pass on role"><X size={21} /></Button><Button variant="outline" className="details-action" onClick={() => setDetailsJob(job)}><CircleHelp size={16} /> Details</Button><Button variant="outline" size="icon" className="swipe-save" onClick={saveCurrent} aria-label="Save role for later" title="Save role for later"><Heart size={20} /></Button><Button className="swipe-apply" onClick={() => setApplyJob(job)}>Apply &amp; reach out <ArrowRight size={16} /></Button></div>
+      <p className="swipe-hint">On touch screens, drag left to pass or right to apply. Use the heart to save a role for later.</p>
     </div> : <EmptyState icon={Compass} title="No more roles in this view" body="Change your search or location filter, or reset the demo to replay the sample queue." action={<Button variant="outline" onClick={() => { setSearch(""); setLocation("all"); restoreSkippedJob(state.skippedIds[0] ?? ""); }}>Clear filters</Button>} />}
-    <ApplyDialog job={applyJob} onClose={() => setApplyJob(null)} />
+    <ApplyDialog key={applyJob?.id ?? "apply"} job={applyJob} onClose={() => setApplyJob(null)} />
     <JobDetailsDialog job={detailsJob} onClose={() => setDetailsJob(null)} onApply={(selected) => { setDetailsJob(null); setApplyJob(selected); }} />
   </div>;
 }
@@ -485,16 +487,20 @@ function ShortlistPage() {
 
 function ApplyDialog({ job, onClose }: { job: Job | null; onClose: () => void }) {
   const { state, applyToJob } = useSmartHire();
+  const [introMessage, setIntroMessage] = useState("");
   const company = job ? demoCompanies.find((item) => item.id === job.companyId) : undefined;
   const alreadyApplied = job ? state.applications.some((application) => application.jobId === job.id) : false;
   return <Dialog open={Boolean(job)} onOpenChange={(open) => { if (!open) onClose(); }}>
     <DialogContent><DialogHeader><DialogTitle>Confirm your application</DialogTitle><DialogDescription>{job ? `${job.title} at ${company?.name ?? "Sample company"}` : "Review this application."}</DialogDescription></DialogHeader>
-      <div className="confirm-summary"><p>Your current sample profile and résumé name will be attached to this demo application.</p><p className="dialog-footnote">This submits a sample application in this browser only. It is not sent to an employer.</p></div>
+      <div className="confirm-summary"><p>Your current sample profile and résumé name will be attached to this demo application.</p><Field label="Note to the hiring team · optional"><Textarea value={introMessage} onChange={(event) => setIntroMessage(event.target.value)} rows={3} placeholder="Share a brief introduction or why this role interests you..." /></Field><p className="dialog-footnote">This submits a sample application in this browser only. It is not sent to an employer.</p></div>
       <DialogFooter><Button variant="outline" onClick={onClose}>Go back</Button><Button disabled={!job || alreadyApplied} onClick={() => {
-        if (job && applyToJob(job.id)) toast.success("Application added", { description: "Find it in your application tracker." });
+        if (job && applyToJob(job.id, introMessage)) {
+          toast.success("Application sent", { description: "The hiring team can review your profile and note." });
+          setIntroMessage("");
+        }
         else toast.info("You already applied to this role.");
         onClose();
-      }}>{alreadyApplied ? "Already applied" : "Confirm application"}</Button></DialogFooter>
+      }}>{alreadyApplied ? "Already applied" : "Send application"}</Button></DialogFooter>
     </DialogContent>
   </Dialog>;
 }
@@ -512,14 +518,15 @@ function JobDetailsDialog({ job, onClose, onApply }: { job: Job | null; onClose:
 
 function ApplicationList({ compact = false }: { compact?: boolean }) {
   const { state } = useSmartHire();
+  const [chatApplication, setChatApplication] = useState<Application | null>(null);
   const applications = compact ? state.applications.slice(0, 3) : state.applications;
   if (!applications.length) return <EmptyState icon={BriefcaseBusiness} title="No applications yet" body="Submit an application from a role you want to pursue." action={<Button asChild><Link to="/discover">Discover roles</Link></Button>} />;
-  return <div className="application-list">{applications.map((application) => {
+  return <><div className="application-list">{applications.map((application) => {
     const job = state.jobs.find((item) => item.id === application.jobId);
     const company = job ? demoCompanies.find((item) => item.id === job.companyId) : undefined;
     if (!job || !company) return null;
-    return <Card key={application.id} className="application-card rounded-lg shadow-none"><CardContent className="application-card-content"><CompanyMark company={company} small /><div className="application-info"><div className="recommendation-title-row"><h3>{job.title}</h3><StatusBadge status={application.status} /></div><p>{company.name} · Applied {formatDate(application.appliedAt)}</p>{!compact && <><Progress value={applicationProgress(application.status)} aria-label={`${application.status} progress`} className="application-progress" /><div className="application-timeline">{application.recruiterUpdates.map((update, index) => <span key={`${application.id}-${index}`}><i className={index === application.recruiterUpdates.length - 1 ? "timeline-dot current" : "timeline-dot"} />{update}</span>)}</div></>}</div><Button asChild variant="ghost" size="icon" aria-label={`View interview details for ${job.title}`} title="Open interviews"><Link to="/interviews"><ChevronRight size={18} /></Link></Button></CardContent></Card>;
-  })}</div>;
+    return <Card key={application.id} className="application-card rounded-lg shadow-none"><CardContent className="application-card-content"><CompanyMark company={company} small /><div className="application-info"><div className="recommendation-title-row"><h3>{job.title}</h3><StatusBadge status={application.status} /></div><p>{company.name} · Applied {formatDate(application.appliedAt)}</p>{!compact && <><Progress value={applicationProgress(application.status)} aria-label={`${application.status} progress`} className="application-progress" /><div className="application-timeline">{application.recruiterUpdates.map((update, index) => <span key={`${application.id}-${index}`}><i className={index === application.recruiterUpdates.length - 1 ? "timeline-dot current" : "timeline-dot"} />{update}</span>)}</div></>}</div>{!compact && isApplicationChatOpen(application.status) && <Button variant="outline" size="sm" onClick={() => setChatApplication(application)}><MessageCircle size={15} /> Chat</Button>}<Button asChild variant="ghost" size="icon" aria-label={`View interview details for ${job.title}`} title="Open interviews"><Link to="/interviews"><ChevronRight size={18} /></Link></Button></CardContent></Card>;
+  })}</div><ApplicationChatDialog application={chatApplication} onClose={() => setChatApplication(null)} /></>;
 }
 
 function ApplicationsPage() {
@@ -752,6 +759,7 @@ function RecruiterPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [scheduleFor, setScheduleFor] = useState<Application | null>(null);
+  const [chatFor, setChatFor] = useState<Application | null>(null);
   const activeJobs = state.jobs.filter((job) => job.status === "Active");
   const selectedCount = state.applications.filter((item) => item.status === "Shortlisted").length;
   const interviewsCount = state.interviews.filter((item) => item.status === "Scheduled" || item.status === "Confirmed").length;
@@ -769,8 +777,9 @@ function RecruiterPage() {
     {(formOpen || editingJob) && <JobForm key={editingJob?.id ?? "new"} initialJob={editingJob} onSave={saveJobForm} onCancel={() => { setEditingJob(null); setFormOpen(false); }} />}
     <div className="recruiter-job-list">{state.jobs.map((job) => <Card key={job.id} className="recruiter-job-row rounded-lg shadow-none"><CardContent><div><h3>{job.title}</h3><p><CompanyName companyId={job.companyId} /> · {job.location} · {formatSalary(job.salaryMin, job.salaryMax)}</p></div><Badge variant={job.status === "Active" ? "secondary" : "outline"}>{job.status}</Badge><div className="recruiter-job-actions"><Button variant="ghost" size="sm" onClick={() => { setEditingJob(job); setFormOpen(false); }}>Edit</Button><Button variant="outline" size="sm" onClick={() => saveJob({ ...job, status: job.status === "Active" ? "Paused" : "Active" })}>{job.status === "Active" ? "Pause" : "Resume"}</Button><Button variant="ghost" size="icon" aria-label={`Delete ${job.title}`} onClick={() => { deleteJob(job.id); toast.message("Sample role removed"); }}><Trash2 size={15} /></Button></div></CardContent></Card>)}</div>
     <div className="recruiter-toolbar applicants-heading"><div><h2>Candidate applications</h2><p>Review sample applications, change a status, or add interview details.</p></div></div>
-    {state.applications.length ? <div className="candidate-review-list">{state.applications.map((application) => <CandidateReview key={application.id} application={application} onStatus={changeApplicationStatus} onSchedule={() => setScheduleFor(application)} />)}</div> : <EmptyState icon={Users} title="No sample applicants" body="Applications submitted in Candidate demo appear here." />}
+    {state.applications.length ? <div className="candidate-review-list">{state.applications.map((application) => <CandidateReview key={application.id} application={application} onStatus={changeApplicationStatus} onSchedule={() => setScheduleFor(application)} onMessage={() => setChatFor(application)} />)}</div> : <EmptyState icon={Users} title="No sample applicants" body="Applications submitted in Candidate demo appear here." />}
     <ScheduleInterviewDialog application={scheduleFor} onClose={() => setScheduleFor(null)} onSchedule={(details) => { scheduleInterview(details); setScheduleFor(null); toast.success("Interview details saved", { description: "They now appear in the candidate interview hub." }); }} />
+    <ApplicationChatDialog application={chatFor} onClose={() => setChatFor(null)} />
   </div>;
 }
 
@@ -792,12 +801,12 @@ function JobForm({ initialJob, onSave, onCancel }: { initialJob: Job | null; onS
     </form></CardContent></Card>;
 }
 
-function CandidateReview({ application, onStatus, onSchedule }: { application: Application; onStatus: (applicationId: string, status: ApplicationStatus) => void; onSchedule: () => void }) {
+function CandidateReview({ application, onStatus, onSchedule, onMessage }: { application: Application; onStatus: (applicationId: string, status: ApplicationStatus) => void; onSchedule: () => void; onMessage: () => void }) {
   const { state } = useSmartHire();
   const job = state.jobs.find((item) => item.id === application.jobId);
   if (!job) return null;
   const match = getMatchResult(job, state.profile);
-  return <Card className="candidate-review-card rounded-lg shadow-none"><CardContent><div className="candidate-review-top"><div className="candidate-avatar">{state.profile.fullName.charAt(0)}</div><div><h3>{state.profile.fullName} <Badge variant="outline">Sample candidate</Badge></h3><p>{job.title} · {state.profile.degree} · {state.profile.experience}</p></div><MatchBadge job={job} profile={state.profile} /></div><div className="tag-row">{state.profile.skills.slice(0, 6).map((skill) => <Badge key={skill} variant="secondary">{skill}</Badge>)}</div><div className="candidate-review-actions"><Button variant="outline" size="sm" onClick={() => toast.message("Sample profile details are shown here.")}>View profile</Button><Button variant="outline" size="sm" onClick={() => toast.message(state.profile.resumeName ? `Sample resume: ${state.profile.resumeName}` : "No sample resume added.")}>Résumé: {state.profile.resumeName ? "sample file" : "not added"}</Button><span className="candidate-match-copy">{match.matchedSkills.length}/{job.skills.length} listed skills matched</span><div className="candidate-action-group"><Button variant="outline" size="sm" onClick={() => { onStatus(application.id, "Shortlisted"); toast.success("Sample candidate shortlisted"); }}><ThumbsUp size={14} /> Shortlist</Button><Button variant="ghost" size="sm" onClick={() => { onStatus(application.id, "Rejected"); toast.message("Sample application marked rejected"); }}><ThumbsDown size={14} /> Reject</Button><Button size="sm" onClick={onSchedule}><CalendarDays size={14} /> Schedule</Button></div></div></CardContent></Card>;
+  return <Card className="candidate-review-card rounded-lg shadow-none"><CardContent><div className="candidate-review-top"><div className="candidate-avatar">{state.profile.fullName.charAt(0)}</div><div><h3>{state.profile.fullName} <Badge variant="outline">Sample candidate</Badge></h3><p>{job.title} · {state.profile.degree} · {state.profile.experience}</p></div><MatchBadge job={job} profile={state.profile} /></div><div className="tag-row">{state.profile.skills.slice(0, 6).map((skill) => <Badge key={skill} variant="secondary">{skill}</Badge>)}</div><div className="candidate-review-actions"><Button variant="outline" size="sm" onClick={() => toast.message("Sample profile details are shown here.")}>View profile</Button><Button variant="outline" size="sm" onClick={() => toast.message(state.profile.resumeName ? `Sample resume: ${state.profile.resumeName}` : "No sample resume added.")}>Résumé: {state.profile.resumeName ? "sample file" : "not added"}</Button><span className="candidate-match-copy">{match.matchedSkills.length}/{job.skills.length} listed skills matched</span><div className="candidate-action-group">{isApplicationChatOpen(application.status) && <Button variant="outline" size="sm" onClick={onMessage}><MessageCircle size={14} /> Message</Button>}<Button variant="outline" size="sm" onClick={() => { onStatus(application.id, "Shortlisted"); toast.success("Sample candidate shortlisted"); }}><ThumbsUp size={14} /> Shortlist</Button><Button variant="ghost" size="sm" onClick={() => { onStatus(application.id, "Rejected"); toast.message("Sample application marked rejected"); }}><ThumbsDown size={14} /> Reject</Button><Button size="sm" onClick={onSchedule}><CalendarDays size={14} /> Schedule</Button></div></div></CardContent></Card>;
 }
 
 function ScheduleInterviewDialog({ application, onClose, onSchedule }: { application: Application | null; onClose: () => void; onSchedule: (details: { applicationId: string; jobId: string; companyId: string; date: string; time: string; type: Interview["type"]; rounds: string[]; interviewer: string; hrContact: string; address: string; meetingLink: string; instructions: string }) => void }) {
@@ -875,4 +884,34 @@ function Field({ label, children, className }: { label: string; children: React.
 
 function EmptyState({ icon: Icon, title, body, action }: { icon: typeof BriefcaseBusiness; title: string; body: string; action?: React.ReactNode }) {
   return <div className="empty-state"><span className="empty-state-icon"><Icon size={22} /></span><h2>{title}</h2><p>{body}</p>{action}</div>;
+}
+
+function ApplicationChatDialog({ application, onClose }: { application: Application | null; onClose: () => void }) {
+  const { state, sendApplicationMessage } = useSmartHire();
+  const [draft, setDraft] = useState("");
+  const activeApplication = application
+    ? state.applications.find((item) => item.id === application.id) ?? application
+    : null;
+  const job = activeApplication ? state.jobs.find((item) => item.id === activeApplication.jobId) : undefined;
+  const messages = activeApplication?.messages ?? [];
+  const chatOpen = activeApplication ? isApplicationChatOpen(activeApplication.status) : false;
+  const authorLabel = (author: "candidate" | "recruiter") =>
+    author === state.role ? "You" : author === "candidate" ? state.profile.fullName : "Hiring team";
+
+  function send(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!activeApplication || !draft.trim() || state.role === "admin") return;
+    sendApplicationMessage(activeApplication.id, draft);
+    setDraft("");
+  }
+
+  return <Dialog open={Boolean(application)} onOpenChange={(open) => { if (!open) onClose(); }}>
+    <DialogContent className="wide-dialog application-chat-dialog"><DialogHeader><DialogTitle>{job ? `Conversation · ${job.title}` : "Application conversation"}</DialogTitle><DialogDescription>{job ? `${demoCompanies.find((item) => item.id === job.companyId)?.name ?? "Sample company"} · candidate and hiring team` : "Candidate and hiring team"}</DialogDescription></DialogHeader>
+      {chatOpen ? <>
+        <div className="application-chat-messages" aria-live="polite">{messages.length ? messages.map((message) => <div key={message.id} className={`application-chat-message${message.author === state.role ? " mine" : ""}`}><div><strong>{authorLabel(message.author)}</strong><p>{message.text}</p><small>{new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(message.createdAt))}</small></div></div>) : <p className="application-chat-empty">No messages yet. Start the conversation with the hiring team.</p>}</div>
+        {state.role === "admin" ? <p className="dialog-footnote">Admin demo accounts can view but cannot send messages.</p> : <form className="application-chat-compose" onSubmit={send}><Textarea aria-label="Message hiring team" value={draft} onChange={(event) => setDraft(event.target.value)} rows={2} placeholder="Write a message..." /><Button type="submit" size="icon" aria-label="Send message" disabled={!draft.trim()}><Send size={16} /></Button></form>}
+      </> : <p className="dialog-footnote">Chat opens after the hiring team shortlists this application.</p>}
+      <DialogFooter><Button variant="outline" onClick={onClose}>Close</Button></DialogFooter>
+    </DialogContent>
+  </Dialog>;
 }

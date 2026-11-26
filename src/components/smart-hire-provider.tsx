@@ -6,7 +6,9 @@ import {
   demoJobs,
   demoNotifications,
   demoProfile,
+  isApplicationChatOpen,
   type Application,
+  type ApplicationMessage,
   type ApplicationStatus,
   type AppNotification,
   type CandidateProfile,
@@ -61,7 +63,8 @@ interface SmartHireContextValue {
   removeFromShortlist: (jobId: string) => void;
   skipJob: (jobId: string) => void;
   restoreSkippedJob: (jobId: string) => void;
-  applyToJob: (jobId: string) => boolean;
+  applyToJob: (jobId: string, introMessage?: string) => boolean;
+  sendApplicationMessage: (applicationId: string, text: string) => void;
   saveJob: (job: Job) => void;
   deleteJob: (jobId: string) => void;
   changeApplicationStatus: (applicationId: string, status: ApplicationStatus) => void;
@@ -85,7 +88,11 @@ function createDemoState(): WorkspaceState {
     role: "candidate",
     profile: { ...demoProfile, skills: [...demoProfile.skills], languages: [...demoProfile.languages], technologies: [...demoProfile.technologies] },
     jobs: demoJobs.map((job) => ({ ...job, skills: [...job.skills] })),
-    applications: demoApplications.map((application) => ({ ...application, recruiterUpdates: [...application.recruiterUpdates] })),
+    applications: demoApplications.map((application) => ({
+      ...application,
+      recruiterUpdates: [...application.recruiterUpdates],
+      messages: application.messages ? [...application.messages] : [],
+    })),
     interviews: demoInterviews.map((interview) => ({ ...interview, rounds: [...interview.rounds] })),
     notifications: demoNotifications.map((notification) => ({ ...notification })),
     shortlistIds: ["job-04", "job-11"],
@@ -121,7 +128,12 @@ function readDemoState(raw: string): WorkspaceState | null {
       role: parsed["role"] === "recruiter" || parsed["role"] === "admin" ? parsed["role"] : "candidate",
       profile,
       jobs: Array.isArray(parsed["jobs"]) ? (parsed["jobs"] as Job[]) : defaults.jobs,
-      applications: Array.isArray(parsed["applications"]) ? (parsed["applications"] as Application[]) : defaults.applications,
+      applications: Array.isArray(parsed["applications"])
+        ? (parsed["applications"] as Application[]).map((application) => ({
+            ...application,
+            messages: Array.isArray(application.messages) ? application.messages : [],
+          }))
+        : defaults.applications,
       interviews: Array.isArray(parsed["interviews"]) ? (parsed["interviews"] as Interview[]) : defaults.interviews,
       notifications: Array.isArray(parsed["notifications"]) ? (parsed["notifications"] as AppNotification[]) : defaults.notifications,
       shortlistIds: isStringArray(parsed["shortlistIds"]) ? parsed["shortlistIds"] : defaults.shortlistIds,
@@ -190,14 +202,19 @@ export function SmartHireProvider({ children }: { children: ReactNode }) {
       ),
     restoreSkippedJob: (jobId) =>
       setState((current) => ({ ...current, skippedIds: current.skippedIds.filter((id) => id !== jobId) })),
-    applyToJob: (jobId) => {
+    applyToJob: (jobId, introMessage = "") => {
       if (state.applications.some((application) => application.jobId === jobId)) return false;
+      const trimmedIntro = introMessage.trim();
+      const messages: ApplicationMessage[] = trimmedIntro
+        ? [{ id: makeId("message"), author: "candidate", text: trimmedIntro, createdAt: new Date().toISOString() }]
+        : [];
       const application: Application = {
         id: makeId("application"),
         jobId,
         appliedAt: new Date().toISOString().slice(0, 10),
         status: "Applied",
         recruiterUpdates: ["Application submitted"],
+        messages,
       };
       setState((current) =>
         current.applications.some((existing) => existing.jobId === jobId)
@@ -220,6 +237,27 @@ export function SmartHireProvider({ children }: { children: ReactNode }) {
       );
       return true;
     },
+    sendApplicationMessage: (applicationId, text) =>
+      setState((current) => {
+        const cleaned = text.trim();
+        const application = current.applications.find((item) => item.id === applicationId);
+        if (!cleaned || !application || !isApplicationChatOpen(application.status)) {
+          return current;
+        }
+        if (current.role === "admin") return current;
+        const message: ApplicationMessage = {
+          id: makeId("message"),
+          author: current.role,
+          text: cleaned,
+          createdAt: new Date().toISOString(),
+        };
+        return {
+          ...current,
+          applications: current.applications.map((item) =>
+            item.id === applicationId ? { ...item, messages: [...(item.messages ?? []), message] } : item,
+          ),
+        };
+      }),
     saveJob: (job) =>
       setState((current) => {
         const exists = current.jobs.some((item) => item.id === job.id);

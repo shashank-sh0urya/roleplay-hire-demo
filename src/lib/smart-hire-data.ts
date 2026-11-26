@@ -73,6 +73,14 @@ export interface Application {
   status: ApplicationStatus;
   recruiterUpdates: string[];
   interviewId?: string;
+  messages?: ApplicationMessage[];
+}
+
+export interface ApplicationMessage {
+  id: string;
+  author: "candidate" | "recruiter";
+  text: string;
+  createdAt: string;
 }
 
 export interface Interview {
@@ -614,6 +622,10 @@ export function getMatchResult(job: Job, profile: CandidateProfile): MatchResult
   const percentage = job.skills.length === 0 ? 0 : Math.round((matchedSkills.length / job.skills.length) * 100);
 
   return { percentage, matchedSkills, missingSkills };
+}
+
+export function isApplicationChatOpen(status: ApplicationStatus): boolean {
+  return status === "Shortlisted" || status === "Interview Scheduled" || status === "Selected";
 }
 
 export function getProfileCompletion(profile: CandidateProfile): number {

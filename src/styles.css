@@ -1773,6 +1773,69 @@ select:focus-visible {
   color: var(--primary-foreground);
 }
 
+.application-chat-messages {
+  display: grid;
+  min-height: 200px;
+  max-height: 50vh;
+  align-content: start;
+  gap: 9px;
+  overflow: auto;
+  padding: 13px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.application-chat-message {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.application-chat-message.mine {
+  justify-content: flex-end;
+}
+
+.application-chat-message > div {
+  max-width: min(86%, 520px);
+  padding: 9px 11px;
+  background: var(--muted);
+  border-radius: 0 8px 8px 8px;
+}
+
+.application-chat-message.mine > div {
+  background: color-mix(in oklab, var(--brand-teal), white 88%);
+  border-radius: 8px 0 8px 8px;
+}
+
+.application-chat-message strong,
+.application-chat-message small {
+  color: var(--muted-foreground);
+  font-size: 9px;
+}
+
+.application-chat-message p {
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.application-chat-empty {
+  align-self: center;
+  justify-self: center;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  text-align: center;
+}
+
+.application-chat-compose {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40px;
+  align-items: end;
+  gap: 8px;
+}
+
 .chat-avatar {
   display: grid;
   width: 30px;

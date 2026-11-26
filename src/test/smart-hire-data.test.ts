@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { demoJobs, demoProfile, getMatchResult } from "@/lib/smart-hire-data";
+import { demoJobs, demoProfile, getMatchResult, isApplicationChatOpen } from "@/lib/smart-hire-data";
 
 describe("job skill matching", () => {
   it("scores the exact required-skill overlap instead of a random percentage", () => {
@@ -25,5 +25,16 @@ describe("job skill matching", () => {
     expect(result.percentage).toBe(0);
     expect(result.matchedSkills).toEqual([]);
     expect(result.missingSkills).toEqual([]);
+  });
+});
+
+describe("application conversations", () => {
+  it("opens only after shortlisting and stays open through later stages", () => {
+    expect(isApplicationChatOpen("Applied")).toBe(false);
+    expect(isApplicationChatOpen("Under Review")).toBe(false);
+    expect(isApplicationChatOpen("Rejected")).toBe(false);
+    expect(isApplicationChatOpen("Shortlisted")).toBe(true);
+    expect(isApplicationChatOpen("Interview Scheduled")).toBe(true);
+    expect(isApplicationChatOpen("Selected")).toBe(true);
   });
 });
